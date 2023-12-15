@@ -1,0 +1,380 @@
+·       Railways in the Andes, a practical problem.
+(Jerry Breecher – CS3013 – Operating Systems Process Synchronization -page 25)
+·       The Sleeping Teaching Assistant problem.
+(Abraham Silberschatz, Peter Baer Galvin, Greg Gagne – Operating System Concepts 9th edition, page 251)
+·       The Cigarette Smokers' problem
+( David Lorge. Parnas Carnegie Mellon University - On a solution to the cigarette smokers' problem )
+·       The Santa Claus problem
+( William Stallings. Operating Systems: Internals and Design Principles. Prentice Hall, sixth edition )
+·       Building H20 problem
+( Gregory R. Andrews. Concurrent Programming: Principles and Practice. Addison-Wesley, 1991. )
+
+1.        Railways in the Andes, a practical problem.
+·       Problem:
+High in the Andes mountains, there are two circular railway lines. One line is in Peru, the other in Bolivia. They share a common section oftrack where the lines cross a mountain pass that lies on the internationalborder (near Lake Titicaca?).
+Unfortunately, the Peruvian and Bolivian trains occasionally collide when simultaneously entering the common section of track (the mountain pass). The trouble is, alas, that the drivers of the two trains areboth blind and deaf, so they can neither see nor hear each other.
+
+The two drivers agreed on the following method of preventing collisions. They set up a large bowl at the entrance to the pass. Before entering the pass, a driver must stop his train, walk over to the bowl, and reach into it to see it it contains a rock. If the bowl is empty, the driver finds a rock and drops it in the bowl, indicating that his train is entering the pass; once his train has cleared the pass, he must walk back to the bowl and remove his rock, indicating that the pass in no longer being used. Finally, he walks back to the train and continues down the line. If a driver arriving at the pass finds a rock in the bowl, he leaves the rock there; he repeatedly takes a siesta and rechecks the bowl until he finds it empty. Then he drops a rock in the bowl and drives his train into the pass. A smart graduate from the University of La Paz (Bolivia) claimed that subversive train schedules made up by Peruvian officials could block the train forever.
+The Bolivian driver just laughed and said that could not be true because it never happened. Unfortunately, one day the two trains crashed.
+ð  My explain: before two trains crashed, both driver arrive to the entry at the same time. The first walks to the bowl and find it empty, so he search for a rock. At the same time, the second walks to the bowl and find it empty too, so he search for a rock. Because they blind so they can’t see the other, they drop their rocks to the bowl and return the train, both drive into the pass  => crash,  this break condition of mutual exclusion.
+
+This is an example of the test and set problem when the test is separated from the set.
+            Following the crash, the graduate was called in as a consultant to ensure that no more crashes would occur. He explained that the bowl was being used in the wrong way. The Bolivian driver must wait at the entry to the pass until the bowl is empty, drive through the pass and walk back to put a rock in the bowl. The Peruvian driver must wait at the entry until the bowl contains a rock, drive through the pass and walk back to remove the rock from the bowl. Sure enough, his method prevented crashes.
+ Prior to this arrangement, the Peruvian train ran twice a day and the Bolivian train ran once a day. The Peruvians were very unhappy with the new arrangement
+Explain The graduate was called in again and was told to prevent crashes while avoiding the problem of his previous method. He suggested that two bowls be used, one for each driver. When a driver reaches the entry, he first drops a rock in his bowl, then checks the other bowl to see if it is empty. If so, he drives his train through the pass. Stops and walks back to remove his rock. But if he finds a rock in the other bowl, he goes back to his bowl and removes his rock. Then he takes a siesta, again drops a rock in his bowl and re-checks the other bowl, and so on, until he finds the other bowl empty. This method worked fine until late in May, when the two trains were simultaneously blocked at the entry for many siestas.
+
+ð  My explain: This method of the graduate worked like the lock-in method (with two lock in this example).
+ð  Suppose both drive arrive to the entry of the pass at the same time. Both drop rock into the their bowl at the same time and check the other bowl, because both bowl contain a rock so no one can drive into the pass and must remove a rock of their bowl then take siestas.
+If the supposition loops many time, two train locked at the entry for many siestas and this
+break condition of progress.
+
+ 
+
+
+
+
+
+
+
+
+
+2.       The Sleeping Teaching Assitant:
+
+   The Sleeping Teaching Assitant is a  variation of The barbershop problem appears in Silberschatz and Galvin’s Operating Systems Concepts. A university computer sicence department has a teaching assistan (TA) who helps undergraduate students with their programing assignments during regular office hours. The TA’s office is rather small and has room for only one desk with a chair and computer. There are three chairs in the hallway outside the office where student can sit and wait if the TA is currently helping another  student. When there are no student who need help during office hours, the TA sits at the desk and takes a nap. If a student arrives during office hours and finds the TA sleeping, the student must awaken the TA to ask for help. If a student arrives and finds the TA currently helping another student, the student sits on one of the chairs in the hallway and waits. If no chair are available, the student will come back at a later time.
+
+Initialization:
+·         n = 4; ( number of chairs at the hallway & office)
+·         mutex = 1; (number of chair at teacher’s office – critical section)
+·         students = 0; (total number of students at the hallway & office)
+ Pseudocode for student:
+do {
+                if(students == n) leave();
+                else{     
+                                students++;
+                                mutex.wait();
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+                                   askForHelp(); 
+                                      mutex.signal();                
+                  }
+          }while(1);
+
+
+3.       The Cigarette Smokers' problem:
+·         Introduction:
+In a widely circulated and referenced memorandum , Suhas Patil has introduced a synchronization problem entitled "The Cigarette Smokers’s Problem". He claims that the problem cannot be solved using the P and V primitives introduced by Dijkstra unless conditional statements are also used. He supports that claim with an elaborate proof in terms of Petri Nets. On the basis of that proof, Patil concludes that the P and V primitives are not sufficiently powerful and that more complex operations are needed. In this paper we present a solution to the Cigarette Smokerk’s Problem, discuss the "flaw" in Patil1’s proof, and discuss the need for additional operations.
+·         Problem:
+Assume a cigarette requires three ingredients to make and smoke: tobacco, paper, and matches. There are three smokers around a table, each of whom has an infinite supply of one of the three ingredients — one smoker has an infinite supply of tobacco, another has paper, and the third has matches.
+There is also a non-smoking agent who enables the smokers to make their    cigarettes by arbitrarily (non-deterministically) selecting two of the supplies to place on the table. The smoker who has the third supply should remove the two items from the table, using them (along with their own supply) to make a cigarette, which they smoke for a while. Once the smoker has finished his cigarette, the agent places two new random items on the table. This process continues forever.
+Three semaphores are used to represent the items on the table; the agent increases the appropriate semaphore to signal that an item has been placed on the table, and smokers decrement the semaphore when removing items. Also, each smoker has an associated semaphore that they use to signal to the agent that they are done smoking; the agent has a process that waits on each smoker's semaphore to let it know that it can place the new items on the table.
+A simple pseudocode implementation of the smoker who has the supply of tobacco might look like the following:
+def tobacco_smoker():
+    repeat:
+        paper.wait()
+        matches.wait()
+        smoke()
+        tobacco_smoker_done.signal()
+However, this can lead to deadlock; if the agent places paper and tobacco on the table, the smoker with tobacco may remove the paper, leaving the smoker with matches unable to make their cigarette. The problem is to define additional processes and semaphores that prevent deadlock, without modifying the agent.
+
+
+
+
+4.       The Santa Claus problem:
+·         Introduction:
+This problem is from William Stallings’s Operating Systems , but he attributes it to John Trono of St. Michael’s College in Vermont.
+·         Problem:
+( Original problem refer at  William Stallings’s Operating Systems, page 261)
+    Stand Claus sleeps in his shop at the North Pole and can only be awakened by either (1) all nine reindeer being back from their vacation in the South Pacific, or (2) some of the elves having difficulty making toys; to allow Santa to get some sleep, the elves can only wake him when three of them have problems. When three elves are having their problems solved, any other elves wishing to visit Santa must wait for those elves to return. If Santa wakes up to find three elves waiting at his shop’s door, along with the last reindeer having come back from the tropics, Santa has decided that the elves can wait until after Christmas, because it is more important to get his sleigh ready. (It is assumed that the reindeer do not want to leave the tropics, and therefore they stay there until the last possible moment.) The last reindeer to arrive must get Santa while the others wait in a warming hut before being harnessed to the sleigh.
+Here are some addition specifications:
+• After the ninth reindeer arrives, Santa must invoke prepareSleigh,   and then all nine reindeer must invoke getHitched.
+• After the third elf arrives, Santa must invoke helpElves. Concurrently, all three elves should invoke getHelp.
+• All three elves must invoke getHelp before any additional elves enter (increment the elf counter).
+Santa should run in a loop so he can help many sets of elves. We can assume that there are exactly 9 reindeer, but there may be any number of elves.
+
+5.       Building H2O problem:
+·         Introduction:
+This problem has been a staple of the Operating Systems class at U.C. Berkeley for at least a decade. It seems to be based on an exercise in Andrews’s Concurrent Programming.
+
+·         Problem:
+There are two kinds of threads, oxygen and hydrogen. In order to assemble these threads into water molecules, we have to create a barrier that makes each thread wait until a complete molecule is ready to proceed. As each thread passes the barrier, it should invoke bond. You must guarantee that all the threads from one molecule invoke bond before any of the threads from the next molecule do. In other words:
+• If an oxygen thread arrives at the barrier when no hydrogen threads are present, it has to wait for two hydrogen threads.
+• If a hydrogen thread arrives at the barrier when no other threads are present, it has to wait for an oxygen thread and another hydrogen thread.
+ We don’t have to worry about matching the threads up explicitly; that is, the threads do not necessarily know which other threads they are paired up with. The key is just that threads pass the barrier in complete sets; thus, if we examine the sequence of threads that invoke bond and divide them into groups of three, each group should contain one oxygen and two hydrogen threads. Puzzle: Write synchronization code for oxygen and hydrogen molecules that enforces these constraints.
+·         Solution:
+Here are the variables I used in my solution:
+mutex = Semaphore (1)
+oxygen = 0
+hydrogen = 0
+barrier = Barrier (3)
+oxyQueue = Semaphore (0)
+hydroQueue = Semaphore (0)
+Oxygen and hydrogen are counters, protected by mutex. barrier is where each set of three threads meets after invoking bond and before allowing the next set of threads to proceed. oxyQueue is the semaphore oxygen threads wait on; hydroQueue is the semaphore hydrogen threads wait on. I am using the naming convention for queues, so oxyQueue.wait() means “join the oxygen queue” and oxyQueue.signal() means “release an oxygen thread from the queue.
+Initially hydroQueue and oxyQueue are locked. When an oxygen thread arrives it signals hydroQueue twice, allowing two hydrogens to proceed. Then the oxygen thread waits for the hydrogen threads to arrive. <Oxygen code>
+ mutex . wait () ;
+oxygen += 1 ;
+if hydrogen >= 2:
+hydroQueue . signal (2)  ;
+hydrogen -= 2 ;
+oxyQueue . signal ()  ;
+oxygen -= 1  ;
+else :
+mutex . signal () ;
+oxyQueue . wait () ;
+bond ();
+barrier . wait () ;
+mutex . signal () ;
+As each oxygen thread enters, it gets the mutex and checks the scoreboard. If there are at least two hydrogen threads waiting, it signals two of them and itself and then bonds. If not, it releases the mutex and waits. After bonding, threads wait at the barrier until all three threads have bonded, and then the oxygen thread releases the mutex. Since there is only one oxygen thread in each set of three, we are guaranteed to signal mutex once. The code for hydrogen is similar:
+<Hydrogen code>
+mutex . wait () ;
+hydrogen += 1 ;
+if hydrogen >= 2 and oxygen >= 1:
+hydroQueue . signal (2)
+hydrogen -= 2 ;
+oxyQueue . signal () ;
+ oxygen -= 1 ;
+else :
+mutex . signal () ;
+hydroQueue . wait () ;
+bond ();
+barrier . wait ();
+An unusual feature of this solution is that the exit point of the mutex is ambiguous. In some cases, threads enter the mutex, update the counter, and exit the mutex. But when a thread arrives that forms a complete set, it has to keep the mutex in order to bar subsequent threads until the current set have invoked bond.
+After invoking bond, the three threads wait at a barrier. When the barrier opens, we know that all three threads have invoked bond and that one of them holds the mutex. We don’t know which thread holds the mutex, but it doesn’t matter as long as only one of them releases it. Since we know there is only one oxygen thread, we make it do the work.
+This might seem wrong, because until now it has generally been true that a thread has to hold a lock in order to release it. But there is no rule that says that has to be true. This is one of those cases where it can be misleading to think of a mutex as a token that threads acquire and release.
+
+Cigarette Smokers Problem:
+
+This problem involves smokers and an agent. Smokers have infinite supplies of one ingredient but need three different ingredients to smoke. The agent puts two random ingredients on the table, and the smoker with the missing ingredient picks them up to smoke.
+Santa Claus Problem:
+
+This problem involves Santa Claus, elves, and reindeer. Elves need Santa's help in groups of three, and reindeer need Santa's help in groups of nine. Santa wakes up when either group is complete.
+Sleeping Barber Problem:
+
+In this problem, there is a barber and a waiting room for customers. The barber sleeps until a customer arrives. If multiple customers arrive, they wake the barber, and the barber serves one customer at a time.
+H2O Problem:
+
+This problem models the synchronization of hydrogen and oxygen atoms to form water molecules. Hydrogen and oxygen atoms arrive in a random order, but water can only be formed when two hydrogen atoms and one oxygen atom are present.
+Dining Savages Problem:
+
+In this problem, a group of savages eats from a common pot of food that can hold M servings. If a savage arrives and the pot is empty, the savage signals the cook to refill the pot. The cook, in turn, waits until the pot is empty before refilling it.
+Philosophers with Different Appetites:
+
+A variation of the Dining Philosophers problem where each philosopher has a different appetite, and the time they spend eating varies. This adds complexity to the synchronization logic.
+Banker's Algorithm:
+
+This is not a specific problem but a resource allocation and deadlock avoidance algorithm. The Banker's algorithm is used by an operating system to manage the allocation of resources to processes and avoid deadlock.
+Barrier Synchronization Problem:
+
+Involves multiple threads reaching a barrier and waiting for all other threads to reach it before any of them can proceed.
+Rendezvous Problem:
+
+Two threads, A and B, are required to wait for each other at a certain point in the execution before proceeding.
+
+
+/*
+Sushi bar 
+Assume a small sushi bar with 5 seats. Customers can enter and leave the
+bar. The general behavior of one customer process looks as follows:
+1 process customer
+2 begin
+3 while true do
+4 enter ();
+5 # eat sushi
+6 leave ();
+7 do
+8 end
+As social persons, the sushi customers behave as follows:
+1. in principle, when a seat is free a customer can enter.
+2. However, if the sushi-bar is full, the (then 5) customers form a group
+who want to finish eating together without disturbance by newcomers.
+So, no new customers are allowed to enter until the sushi-bar is empty
+again.
+2a Semaphore solution (weight 25)
+Solve this synchronization problem by
+• filling out the bodies of enter and leave and
+• using semaphores for your solutions.
+Don’t forget to introduce and initialize appropriately all variables you need
+for our solution, including the semaphore(s).
+(Continued on page 4.)
+Examination in INF4140, 17. December 2013 Page 4
+Hint: you can use a semaphore V -operation with extended functionality of
+the form V (sem, n): It’s an abbreviation for doing the V -operation n-times
+on semaphore sem, where n is a number n ≥ 0.
+2b Invariant (weight 5)
+State a reasonable invariant for the sushi-bar program, capturing both
+conditions for sushi-bar clients stated above.
+Remark 1 (Sushi bar) The problem is decribed in [?, 7.1.2]. The book
+provides first a “wrong” solution. We decided not to show the wrong solution
+and to have it analyzed, because it’s not clear whether such a task is confusing
+(and then puts the student on a wrong track etc).
+There is a certain similarity with the Roller-coaster problem. In the lecture
+the RC problem was given as part of oblig-3, which they should therefore
+be familiar with. A difference is that the RC was intended to be solved by
+monitors, here we ask first for a semaphore solution. The roller-coaster is
+also (as semaphores) described in [?, Section 5.7]. The “interface” (i.e., the
+way the clients are supposed to interact) of the monitor solution and the one
+for the semaphores are not the same. One difference (at least in [?]) between
+the RC and the sushi is that the RC care is “ active” in the sense that it
+triggers “unloading” of the passengers. In the sushi-bar the customers are
+allowed to leave themselves.
+Let’s identify the synchronization needs (first the logical ones, and then
+afterwards, when introducing some shared variables, some mutexes for the
+specific synchronization to protect them). The logical synchronizations are
+described in the task. The way the skeleton is given indicates: the sushibar is not really an “entity” of itself (for instance a monitor-module).
+All the functionality is in the procedures (and appropriate shared vars
+plus semaphores). From the task description, it should be obvious that the
+implementation needs to keep track (probably explicitly, i.e., via dedicated
+shared variables) of two entities
+• customers eating, and
+• customers waiting.
+The obvious invariant is that
+eating ≤ 5
+It also should be a goal (liveness) that if eating = 0, then the number
+of waiting clients is reduced. For leaving: no client must be refused from
+(Continued on page 5.)
+Examination in INF4140, 17. December 2013 Page 5
+leaving, i.e., the exit-procedure must be non-blocking.1 The specific additional
+complication/synchronization condition is: it’s not that a client can enter the
+bar as soon as there’s a free chair: once the sushi-bar is full, it needs to go
+empty again until the first new one can enter (if there are people waiting,
+preferably from the waiting queue, if fairness is an issue.) That means, we
+cannot use the number of eating person in the corresponding synchronization
+condition. Basically, we need at least one more bit to indicate how to interpret
+if the bar is not empty nor full, i.e., if 0 < eating < 5. The border-cases are
+clear. And it’s at the border cases, where that condition toggles. In the code
+below, the boolean must wait is plays that role: it’s initially false, it’s set to
+true when (if ever) hitting 5, and reset to false when (if ever) the number of
+eaters hit 0 egain.
+Those considerations about the logical synch. conditions (and adding some
+mutex protection when doing some manipulations) may lead to the code of
+Listing 3.
+Listing 3: Erroneous solution
+1 enter () {
+2 P ( mutex );
+3 if must_wait
+4 then waiting = waiting + 1;
+5 V ( mutex );
+6 P ( block );
+7 P ( mutex ); # !!
+8 waiting -= 1
+9 else skip ;
+10 eating += 1
+11 must_wait = ( eating == 5)
+12 V ( mutex );
+13 }
+14
+15
+16 leave () {
+17 P ( mutex );
+18 eating -= 1
+19 if eating == 0:
+20 then n = min (5 , waiting )
+21 V
+n ( block );
+22 must_wait = false ;
+23 else skip ;
+24 V ( mutex );
+25 }
+Unfortunately, it’s wrong. The error illustrates one “challenge” of the task.
+The general core of the problem should be known from various places from
+the lecture (where? also with the sem’s?): if an enters the “critical part” of
+such problems (here the sushi bar), that involves 2 things:
+1Probably there will be some mutex-handing when exiting, so technically a blocking
+operation is being done. Nonetheless, assuming that no one stays in its mutex-section
+forever and that the mutex-protections are used appropriately, it’s not a problem, the
+delay is negligible.
+(Continued on page 6.)
+Examination in INF4140, 17. December 2013 Page 6
+1. “testing”: checking that the condition to wait for is satisfied
+2. “setting”: once the thread wishing to enter has been granted access, the
+condition changes again, for instance by setting appropriate variables
+governing the condition.
+The general challenge is to get the testing and setting either atomic, resp.
+make sure that if it’s not atomic, it works nontheless.
+That’s the problem also here: ignoring the boolean variable discussed above,
+the two shared vars needed for getting the logic to work is to keep track of the
+ones eating and the ones waiting.
+In is instructive to compare it with the readers-writers problem (especially
+when done with semaphores), which will highlight the particular challenge
+here. At the surface, the problem seems comparable: in both cases, one needs
+to keept track of a pair of variables, both counting numbers of processes:
+here eating and waiting and in the readers/writers case: reading and writing
+processes. The more problematic variable is the readers in the latter case
+and the ones waiting the case here.2 The crucial difference between the
+two problems is: the readers refer to processes inside the critical section, the
+waiting refers to processes not inside the critical section. As a consequence:
+for the R/W problem
+the reader trying to access the critical section could adapt the
+number of readers with nr++ before getting potentially suspended
+at the guarding semaphore.
+Here, the same is done for the waiting counter. However, and that’s
+the point: once the suspended process is woken up and allowed to proceed
+to the critical section, this variable conceptually is to be decreased. In
+the readers-writers problem, the reader3
+can proceed to the critical section
+without touching this (or any other) shared var again! Here, in entry
+protocol of the customer increases waiting before getting suspended (which is
+unproblematic), but one may be tempted to also decreases it afterwards. That
+will lead to the erroneous code shown, violating the basic safety invariant.
+The correct solution resembles (for instance) the way from the lecture/book
+how to implement P and V operations for FIFO semaphores using S&C
+monitors ( passing the condition, see [?, Figure 5.3]), except that here we
+have no monitors. ut
+Solution 2 (of Sushi) A solution that avoids the mentioned problem is
+given in Listing 4. [?] also presents a second possible solution.
+2why?
+3The writer is less problematic.
+(Continued on page 7.)
+Examination in INF4140, 17. December 2013 Page 7
+Listing 4: Sushi
+1 enter () {
+2 P ( mutex );
+3 if must_wait
+4 then waiting = waiting + 1;
+5 V ( mutex );
+6 P ( block );
+7 else eating = eating +1;
+8 must_wait = ( eating == 5)
+9 V ( mutex );
+10 }
+11
+12
+13 leave () {
+14 P ( mutex );
+15 eating -= 1
+16 if eating == 0:
+17 then n = min (5 , waiting )
+18 waiting = waiting - n ; // !
+19 eating = eating + n ; // !
+20 must_wait = ( eating == 5); // !
+21 V
+n ( block );
+22 else skip ;
+23 V ( mutex );
+
+*/
+
+/* Larry, Moe, and Curly are planting seeds. Larry digs the holes. Moe then places a seed in each hole. Curly then fills the hole up.
+There are several synchronization constraints:
+
+Moe cannot plant a seed unless at least one empty hole exists, but Moe does not care how far Larry gets ahead of Moe.
+Curly cannot fill a hole unless at least one hole exists in which Moe has planted a seed, but the hole has not yet been filled. Curly does not care how far Moe gets ahead of Curly.
+Curly does care that Larry does not get more than MAX holes ahead of Curly. Thus, if there are MAX unfilled holes, Larry has to wait.
+There is only one shovel with which both Larry and Curly need to dig and fill the holes, respectively.
+Sketch out the pseudocode for the 3 processes which represent Larry, Curly, and Moe using semaphores as the synchronization mechanism.
+
+A student majoring in anthropology and minoring in computer science has embarked on a research project to see if African baboons can be taught about deadlocks. He locates a deep canyon and fastens a rope across it, so the baboons can cross hand-over-hand. Several baboons can cross at the same time, provided that they are all going in the same direction. If eastward moving and westward moving baboons ever get onto the rope at the same time, a deadlock will result (the baboons will get stuck in the middle) because it is impossible for one baboon to climb over another one while suspended over the canyon. If a baboon wants to cross the canyon, it must check to see that no other baboon is currently crossing in the opposite direction. Write a program that avoids deadlock. Do not worry about a series of eastward moving baboons holding up the westward moving baboons indefinitely (starvation). */
